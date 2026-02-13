@@ -1,0 +1,6 @@
+npm i express multer cors tesseract.js // multer for middleware 
+
+//Tesseract.js is a pure JavaScript library that provides Optical Character Recognition (OCR) capabilities, allowing developers to extract text from images in over 100 languages
+
+npm i pdf-parse
+npm i dotenv
