@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Resume AI - Student Version</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            line-height: 1.6;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #result {
+            display: none;
+            background: #f4f4f4;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+        <h1>Resume Analyzer</h1>
+        <form id="uploadForm">
+            <input type="file" id="resume" accept=".pdf" required><br><br>
+            <input type="text" id="targetRole" placeholder="Target Role (e.g. Java Developer)"
+                value="Software Developer"><br><br>
+            <button type="submit" id="btn">Analyze Now</button>
+        </form>
+
+        <p id="status"></p>
+
+        <div id="result">
+            <h2>ATS Score: <span id="score"></span>/100</h2>
+            <p><strong>Verdict:</strong> <span id="verdict"></span></p>
+            <h3>Suggestions:</h3>
+            <ul id="suggestions"></ul>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+
+        form.addEventListener('submit', async (e)=>{
+            e.preventDefault();
+
+            const file = document.getElementById('resume').files[0];
+            const role = document.getElementById('targetRole').value;
+            const status = document.getElementById('status');
+            const resultDiv = document.getElementById('result');
+
+            // 1. Prepare Data
+
+            const formData = new FormData();
+            formData.append('resume', file);
+            formData.append('targetRole', role);
+
+            status.innerText = "Processing... please wait.";
+            resultDiv.style.display = "none";
+
+            try {
+                // 2. Call API
+                const response = await fetch('/resume/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+
+                // 3. Display Data
+                document.getElementById('score').innerText = data.analysis.atsScore;
+                document.getElementById('verdict').innerText = data.analysis.oneLineVerdict;
+
+                const list = document.getElementById('suggestions');
+                list.innerHTML = data.analysis.quickFixes.map(item => <li>${item}</li>).join('');
+
+                resultDiv.style.display = "block";
+                status.innerText = "Success!";
+            } catch (err) {
+                status.innerHTML = <span class="error">Error: ${err.message}</span>;
+            }
+        });
+    </script>
+</body>
+
+</html>
